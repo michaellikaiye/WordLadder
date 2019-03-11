@@ -1,4 +1,4 @@
-Pre-Wordladder Assignment
+# Pre-Wordladder Assignment
 You'll be creating a program called "neighbors.py" that reads our standard wordlist (dictall.txt), and finds the "neighbors" of each of the requested words in the input file.  It then outputs the word, and the number of its neighbors (not counting the word itself).
 
 All the words in the input file will be the same length.
@@ -28,6 +28,6 @@ Then the output file will be:
 - love,15
 - bozo,0
 
-You will have 2 seconds of CPU to read, compute and write the output file.
+You will have 5 seconds of CPU to read, compute and write the output file.
 
 You may "import sys" as your only library import

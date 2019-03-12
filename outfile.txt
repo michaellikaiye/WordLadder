@@ -1,0 +1,10 @@
+head,12
+love,15
+bozo,0
+abcv,0
+join,3
+them,6
+such,3
+that,8
+life,11
+ends,0

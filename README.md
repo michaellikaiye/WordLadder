@@ -23,6 +23,7 @@ If the input file is:
 - head
 - love
 - bozo
+
 Then the output file will be:
 - head,12
 - love,15

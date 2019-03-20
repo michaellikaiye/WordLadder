@@ -1,53 +1,225 @@
 #! /usr/bin/python3
 import sys
-#import time
-#start_time = time.time()
 
-# setup
-dictall = open('dictall.txt', 'r')
-wordsin = open(sys.argv[1], 'r')
-wordsout = open(sys.argv[2], 'w')
+class Word:
+    def __init__(self, v, g=-1, l=[]):
+        self.value = v
+        self.uninformed = g
+        self.list = l
 
-inputs = wordsin.read().split('\n')
-allwords = dictall.read().split('\n')
 
-for i in range(len(inputs)):
-    if inputs[i] == '':
-        inputs.pop(i)
+def my_cmp(a, b):
+    if a.uninformed < b.uninformed:
+        return -1
+    if a.uninformed == b.uninformed:
+        return 0
+    return 1
 
-# creating dict
-length = len(inputs[0])
-dict = {}
-for word in allwords:
-    if len(word) == length:
-        dict[word] = []
 
-# inserting dict values
-letters = list('abcdefghijklmnopqrstuvwxyz')
-for word in dict.keys():
-    temp = set()
-    for i in range(length):
-        for letter in letters:
-            alt = word[:i] + letter + word[i + 1:]
-            if alt in dict:
-                temp.add(alt)
-    temp.remove(word)
-    dict[word] = list(temp)
+class Pqueue:
+    def OrdinaryComparison(self, a, b):
+        if a < b:
+            return -1
+        if a == b:
+            return 0
+        return 1
 
-# returning output
-for word in inputs:
-    n = 0
-    if word in dict:
-        n = len(dict[word])
-    s = word + ',' + str(n) + '\n'
-    wordsout.write(s)
-dictall.close()
-wordsin.close()
-wordsout.close()
+    def __init__(self, comparator=None):
+        if comparator == None:
+            self.cmpfunc = self.OrdinaryComparison
+        else:
+            self.cmpfunc = comparator
+        self.size = 0
+        self.list = [None]
 
-# extra
-f = open(sys.argv[2], 'r')
-print("reading output file:")
-print(f.read())
-#elapsed_time = time.time() - start_time
-#print('time elapsed:', elapsed_time)
+    def __str__(self):
+        if size > 0 and isinstance(self.list[1], Word):
+            return ' | '.join([i.value + ',' + str(i.uninformed) for i in self.list[1:]])
+        return ' | '. join([str(i) for i in self.list[1:]])
+
+    def push(self, data):
+        self.list.append(data)
+        self.size += 1
+        if self.size > 1:
+            currentLoc = self.size
+            parentLoc = int(currentLoc / 2)
+            while parentLoc > 0 and self.cmpfunc(self.list[currentLoc], self.list[parentLoc]) == -1:
+                self.list[parentLoc], self.list[currentLoc] = self.list[currentLoc], self.list[parentLoc]
+                currentLoc = parentLoc
+                parentLoc = int(currentLoc / 2)
+
+    def push_all(self, lst):
+        for data in lst:
+            self.push(data)
+
+    def Asmallest(self, a, b, c):
+        if self.cmpfunc(b, c) == 1:
+            if self.cmpfunc(a, c) == 1:
+                return 2
+            else:
+                return 0
+        elif self.cmpfunc(b, c) == -1:
+            if self.cmpfunc(a, b) == 1:
+                return 1
+            else:
+                return 0
+        else:
+            # choose LEFT if equal
+            if self.cmpfunc(a, b) == 1:
+                return 1
+            else:
+                return 0
+
+    def pop(self):
+        if self.size == 0:
+            return None
+        else:
+            smallest = self.list[1]
+        self.list[1] = self.list[self.size]
+        self.list.pop(self.size)
+        self.size -= 1
+        currentLoc = 1
+        childLoc1 = currentLoc * 2
+        childLoc2 = childLoc1 + 1
+        currentIsSmaller = False
+        while currentIsSmaller == False and self.size > 1:
+            if childLoc1 > self.size:
+                return smallest
+            if childLoc1 == self.size:
+                if self.cmpfunc(self.list[currentLoc], self.list[childLoc1]) == 1:
+                    self.list[currentLoc], self.list[childLoc1] = self.list[childLoc1], self.list[currentLoc]
+                return smallest
+            if childLoc2 == self.size:
+                path = self.Asmallest(
+                    self.list[currentLoc], self.list[childLoc1], self.list[childLoc2])
+                if path == 1:
+                    self.list[currentLoc], self.list[childLoc1] = self.list[childLoc1], self.list[currentLoc]
+                elif path == 2:
+                    self.list[currentLoc], self.list[childLoc2] = self.list[childLoc2], self.list[currentLoc]
+                return smallest
+            if childLoc2 < self.size:
+                path = self.Asmallest(
+                    self.list[currentLoc], self.list[childLoc1], self.list[childLoc2])
+                if path == 1:
+                    self.list[currentLoc], self.list[childLoc1] = self.list[childLoc1], self.list[currentLoc]
+                    currentLoc = childLoc1
+                    childLoc1 = currentLoc * 2
+                    childLoc2 = childLoc1 + 1
+                elif path == 2:
+                    self.list[currentLoc], self.list[childLoc2] = self.list[childLoc2], self.list[currentLoc]
+                    currentLoc = childLoc2
+                    childLoc1 = currentLoc * 2
+                    childLoc2 = childLoc1 + 1
+                else:
+                    currentIsSmaller = True
+        return smallest
+
+    def length(self):
+        return self.size
+
+    def peek(self):
+        if self.size == 0:
+            return None
+        return self.list[1]
+
+    def tolist(self):
+        q = []
+        while self.size > 0:
+            q.append(self.pop())
+        return q
+
+
+
+
+
+def getDict(length):
+    dictall = open('dictall.txt', 'r')
+    # creating dict
+    dict = {}
+    for line in dictall:
+        word = line.strip()
+        if len(word) == length:
+            dict[word] = set()
+    # inserting dict values
+    letters = list('abcdefghijklmnopqrstuvwxyz')
+    for word in dict.keys():
+        for i in range(length):
+            for letter in letters:
+                alt = word[:i] + letter + word[i + 1:]
+                if alt in dict:
+                    dict[word].add(alt)
+        dict[word].remove(word)
+    dictall.close()
+    return dict
+
+
+def neighbors(infile, outfile):
+    # setup
+    wordsin = open(infile, 'r')
+    wordsout = open(outfile, 'w')
+    length = len(wordsin.readline().strip())
+    wordsin.seek(0)
+    dict = getDict(length)
+    # returning output
+    for line in wordsin:
+        word = line.strip()
+        if word in dict:
+            s = word + ',' + str(len(dict[word])) + '\n'
+        else:
+            s = word + ',0\n'
+        wordsout.write(s)
+    wordsin.close()
+    wordsout.close()
+    return dict
+
+
+def wordladder(inWord, outWord, dict):
+    if not(inWord in dict) or not(outWord in dict):
+        return inWord + ',' + outWord
+    source = Word(inWord, 0, [inWord])
+    target = Word(outWord)
+    frontier = Pqueue(my_cmp)
+    explored = {}
+    frontier.push(source)
+    top = frontier.pop()
+    while top != None:
+        if top.value == target.value:
+            return ','.join(top.list)
+        neighbors = dict[top.value]
+        for neighbor in neighbors:
+            if not(neighbor in explored):
+                nextUninformed = top.uninformed + 1
+                nextList = top.list[:]
+                nextList.append(neighbor)
+                next = Word(neighbor, nextUninformed, nextList)
+                frontier.push(next)
+        explored[top.value] = top
+        top = frontier.pop()
+    return inWord + ',' + outWord
+
+
+def process(infile, outfile):
+    # setup
+    wordsin = open(infile, 'r')
+    wordsout = open(outfile, 'w')
+    line = wordsin.readline().strip()
+    length = line.find(',')
+    wordsin.seek(0)
+    dict = getDict(length)
+    # returning output
+    for line in wordsin:
+        words = line.strip().split(',')
+        s = wordladder(words[0], words[1], dict)
+        wordsout.write(s + '\n')
+    wordsin.close()
+    wordsout.close()
+
+
+def main():
+    # neighbor(sys.argv[1], sys.argv[2])
+    process(sys.argv[1], sys.argv[2])
+    f = open(sys.argv[2], 'r')
+    print("reading output file:\n")
+    print(f.read())
+
+dict = main()

@@ -1,10 +1,5 @@
-head
-love
-bozo
-abcv
-join
-them
-such
-that
-life
-ends
+head,tail
+hate,love
+read,head
+hazy,frog
+head,ache

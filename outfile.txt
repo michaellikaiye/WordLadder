@@ -1,10 +1,5 @@
-head,12
-love,15
-bozo,0
-abcv,0
-join,3
-them,6
-such,3
-that,8
-life,11
-ends,0
+head,held,hell,tell,tall,tail
+hate,have,hove,love
+read,head
+hazy,lazy,lady,lads,bads,baas,bras,brag,brig,frig,frog
+head,ache

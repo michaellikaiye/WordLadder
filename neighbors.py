@@ -1,20 +1,47 @@
 #! /usr/bin/python3
 import sys
-
+import time
 class Word:
-    def __init__(self, v, g=-1, l=[]):
+    def __init__(self, v, t='', g=-1, l=[]):
         self.value = v
         self.uninformed = g
         self.list = l
+        self.target = t
 
-
-def my_cmp(a, b):
+def my_cmpG(a, b):
     if a.uninformed < b.uninformed:
         return -1
     if a.uninformed == b.uninformed:
         return 0
     return 1
 
+def greed(a,b):
+    # assumes same size
+    g = 0
+    for i in range(len(a)):
+        if a[i] != b[i]:
+            g += 1
+    return g
+
+def my_cmpH(a,b):
+    aGreedy = greed(a.value, a.target)
+    bGreedy = greed(b.value, b.target)
+    if aGreedy < bGreedy:
+        return -1
+    if aGreedy == bGreedy:
+        return 0
+    return 1
+
+def my_cmpA(a,b):
+    aGreedy = greed(a.value, a.target)
+    bGreedy = greed(b.value, b.target)
+    aT = aGreedy + a.uninformed
+    bT = bGreedy + b.uninformed
+    if aT < bT:
+        return -1
+    if aT == bT:
+        return 0
+    return 1
 
 class Pqueue:
     def OrdinaryComparison(self, a, b):
@@ -176,9 +203,9 @@ def neighbors(infile, outfile):
 def wordladder(inWord, outWord, dict):
     if not(inWord in dict) or not(outWord in dict):
         return inWord + ',' + outWord
-    source = Word(inWord, 0, [inWord])
-    target = Word(outWord)
-    frontier = Pqueue(my_cmp)
+    source = Word(inWord, outWord, 0, [inWord])
+    target = Word(outWord, outWord)
+    frontier = Pqueue(my_cmpG)
     explored = {}
     frontier.push(source)
     top = frontier.pop()
@@ -191,7 +218,7 @@ def wordladder(inWord, outWord, dict):
                 nextUninformed = top.uninformed + 1
                 nextList = top.list[:]
                 nextList.append(neighbor)
-                next = Word(neighbor, nextUninformed, nextList)
+                next = Word(neighbor, outWord, nextUninformed, nextList)
                 frontier.push(next)
         explored[top.value] = top
         top = frontier.pop()
@@ -221,5 +248,7 @@ def main():
     f = open(sys.argv[2], 'r')
     print("reading output file:\n")
     print(f.read())
-
+start = time.time()
 dict = main()
+end = time.time()
+print(end - start)

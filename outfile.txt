@@ -1,5 +1,5 @@
 head,held,hell,tell,tall,tail
-hate,have,hove,love
+hate,late,lave,love
 read,head
-hazy,lazy,lady,lads,bads,baas,bras,brag,brig,frig,frog
+hazy,haze,hare,bare,bars,baas,bras,brag,brig,frig,frog
 head,ache

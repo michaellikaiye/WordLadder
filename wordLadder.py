@@ -200,12 +200,12 @@ def neighbors(infile, outfile):
     return dict
 
 
-def wordladder(inWord, outWord, dict):
+def wordladder(inWord, outWord, dict, func):
     if not(inWord in dict) or not(outWord in dict):
         return inWord + ',' + outWord
     source = Word(inWord, outWord, 0, [inWord])
     target = Word(outWord, outWord)
-    frontier = Pqueue(my_cmpG)
+    frontier = Pqueue(func)
     explored = {}
     frontier.push(source)
     top = frontier.pop()
@@ -225,7 +225,7 @@ def wordladder(inWord, outWord, dict):
     return inWord + ',' + outWord
 
 
-def process(infile, outfile):
+def process(infile, outfile, func):
     # setup
     wordsin = open(infile, 'r')
     wordsout = open(outfile, 'w')
@@ -236,7 +236,7 @@ def process(infile, outfile):
     # returning output
     for line in wordsin:
         words = line.strip().split(',')
-        s = wordladder(words[0], words[1], dict)
+        s = wordladder(words[0], words[1], dict, func)
         wordsout.write(s + '\n')
     wordsin.close()
     wordsout.close()
@@ -244,11 +244,34 @@ def process(infile, outfile):
 
 def main():
     # neighbor(sys.argv[1], sys.argv[2])
-    process(sys.argv[1], sys.argv[2])
+
+    start = time.time()
+    print('process using G(n):')
+    process(sys.argv[1], sys.argv[2], my_cmpG)
     f = open(sys.argv[2], 'r')
-    print("reading output file:\n")
+    print("reading output file:")
     print(f.read())
-start = time.time()
-dict = main()
-end = time.time()
-print(end - start)
+    end = time.time()
+    print(end - start)
+    
+'''
+    start = time.time()
+    print('\nprocess using H(n):')
+    process(sys.argv[1], sys.argv[2], my_cmpH)
+    f = open(sys.argv[2], 'r')
+    print("reading output file:")
+    print(f.read())
+    end = time.time()
+    print(end - start)
+    
+    start = time.time()
+    print('\nprocess using A(n):')
+    process(sys.argv[1], sys.argv[2], my_cmpA)
+    f = open(sys.argv[2], 'r')
+    print("reading output file:")
+    print(f.read())
+    end = time.time()
+    print(end - start)
+'''
+main()
+

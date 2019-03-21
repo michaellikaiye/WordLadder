@@ -1,42 +1,47 @@
 #! /usr/bin/python3
 import sys
 import time
+
+target = ''
+dict = {}
+
 class Word:
-    def __init__(self, v, t='', g=-1, l=[]):
+    def __init__(self, v, g=-1, l=[]):
         self.value = v
         self.uninformed = g
         self.list = l
-        self.target = t
 
-def my_cmpG(a, b):
-    if a.uninformed < b.uninformed:
-        return -1
-    if a.uninformed == b.uninformed:
-        return 0
-    return 1
-
-def greed(a,b):
-    # assumes same size
+def greed(a):
+    # assumes same size as target
     g = 0
     for i in range(len(a)):
-        if a[i] != b[i]:
+        if a[i] != target[i]:
             g += 1
     return g
 
-def my_cmpH(a,b):
-    aGreedy = greed(a.value, a.target)
-    bGreedy = greed(b.value, b.target)
-    if aGreedy < bGreedy:
+def my_cmpA(a,b):
+    aT = greed(a.value) + a.uninformed
+    bT = greed(b.value) + b.uninformed
+    if aT < bT:
         return -1
-    if aGreedy == bGreedy:
+    if aT == bT:
         return 0
     return 1
 
-def my_cmpA(a,b):
-    aGreedy = greed(a.value, a.target)
-    bGreedy = greed(b.value, b.target)
-    aT = aGreedy + a.uninformed
-    bT = bGreedy + b.uninformed
+def Lmy_cmpA(a,b):
+    aGreedy = greed(a[1])
+    bGreedy = greed(b[1])
+    aT = aGreedy + a[0]
+    bT = bGreedy + b[0]
+    if aT < bT:
+        return -1
+    if aT == bT:
+        return 0
+    return 1
+
+def uninformedL(a,b):
+    aT = a[0]
+    bT = b[0]
     if aT < bT:
         return -1
     if aT == bT:
@@ -162,6 +167,7 @@ class Pqueue:
 def getDict(length):
     dictall = open('dictall.txt', 'r')
     # creating dict
+    global dict
     dict = {}
     for line in dictall:
         word = line.strip()
@@ -177,7 +183,6 @@ def getDict(length):
                     dict[word].add(alt)
         dict[word].remove(word)
     dictall.close()
-    return dict
 
 
 def neighbors(infile, outfile):
@@ -186,7 +191,7 @@ def neighbors(infile, outfile):
     wordsout = open(outfile, 'w')
     length = len(wordsin.readline().strip())
     wordsin.seek(0)
-    dict = getDict(length)
+    getDict(length)
     # returning output
     for line in wordsin:
         word = line.strip()
@@ -200,17 +205,18 @@ def neighbors(infile, outfile):
     return dict
 
 
-def wordladder(inWord, outWord, dict, func):
+def wordladder(inWord, outWord, func):
     if not(inWord in dict) or not(outWord in dict):
         return inWord + ',' + outWord
-    source = Word(inWord, outWord, 0, [inWord])
-    target = Word(outWord, outWord)
+    source = Word(inWord, 0, [inWord])
+    global target
+    target = outWord
     frontier = Pqueue(func)
     explored = {}
     frontier.push(source)
     top = frontier.pop()
     while top != None:
-        if top.value == target.value:
+        if top.value == target:
             return ','.join(top.list)
         neighbors = dict[top.value]
         for neighbor in neighbors:
@@ -218,88 +224,117 @@ def wordladder(inWord, outWord, dict, func):
                 nextUninformed = top.uninformed + 1
                 nextList = top.list[:]
                 nextList.append(neighbor)
-                next = Word(neighbor, outWord, nextUninformed, nextList)
+                next = Word(neighbor, nextUninformed, nextList)
                 frontier.push(next)
         explored[top.value] = top
         top = frontier.pop()
     return inWord + ',' + outWord
 
+def Lwordladder(inWord, outWord, func):
+    if not(inWord in dict) or not(outWord in dict):
+        return inWord + ',' + outWord
+    # cost, current, list
+    source = [0, inWord, inWord]
+    global target
+    target = outWord
+    frontier = Pqueue(func)
+    explored = {}
+    frontier.push(source)
+    top = frontier.pop()
+    while top != None:
+        current = top[1]
+        if current == target:
+            return ','.join(top[2:])
+        neighbors = dict[current]
+        for neighbor in neighbors:
+            if not(neighbor in explored):
+                next = top[:]
+                next[0] = top[0] + 1
+                next[1] = neighbor
+                next.append(neighbor)
+                frontier.push(next)
+        explored[current] = 0
+        top = frontier.pop()
+    return inWord + ',' + outWord
 
-def process(infile, outfile, func):
+
+
+def process(infile, outfile, func, ladder):
     # setup
     wordsin = open(infile, 'r')
     wordsout = open(outfile, 'w')
     line = wordsin.readline().strip()
     length = line.find(',')
     wordsin.seek(0)
-    dict = getDict(length)
+    getDict(length)
     # returning output
     for line in wordsin:
         words = line.strip().split(',')
-        s = wordladder(words[0], words[1], dict, func)
+        s = ladder(words[0], words[1], func)
         wordsout.write(s + '\n')
     wordsin.close()
     wordsout.close()
 
-def longest(func):
-    dict = getDict(4)
+def longest(word):
+    source = [0, word, word]
+    frontier = Pqueue(uninformedL)
+    explored = {}
+    frontier.push(source)
+    top = frontier.pop()
     long = []
-    for word in dict:
-        for other in dict:
-            if greed(word,other) == 4:
-                source = Word(word, other, 0, [word])
-                target = Word(other, other)
-                frontier = Pqueue(func)
-                explored = {}
-                frontier.push(source)
-                top = frontier.pop()
-                while top != None:
-                    print(top.list)
-                    if frontier.length == 2:
-                        return top.list
-                    neighbors = dict[top.value]
-                    for neighbor in neighbors:
-                        if not(neighbor in explored):
-                            nextUninformed = top.uninformed + 1
-                            nextList = top.list[:]
-                            nextList.append(neighbor)
-                            next = Word(neighbor, other, nextUninformed, nextList)
-                            frontier.push(next)
-                    explored[top.value] = top
-                    top = frontier.pop()
+    while top != None:
+        current = top[1]
+        if len(top) > len(long):
+            long = top[:]
+        # print(','.join(top[2:]))
+        neighbors = dict[current]
+        for neighbor in neighbors:
+            if not(neighbor in explored):
+                next = top[:]
+                next[0] = top[0] + 1
+                next[1] = neighbor
+                next.append(neighbor)
+                frontier.push(next)
+        explored[current] = 0
+        top = frontier.pop()
     return long
+
+def processLong(length):
+    getDict(length)
+    longestAns = [0]
+    i = 0
+    for word in dict.keys():
+        ans = longest(word)
+        if ans[0] >= longestAns[0]:
+            longestAns = ans[:]
+        # print(ans[0], ans[2:])
+        i += 1
+        if i%10 == 1:
+            print(longestAns[0], longestAns[2:])
+            print(ans[0], ans[2:])
 
 def main():
     # neighbor(sys.argv[1], sys.argv[2])
-    '''
+
+    # start = time.time()
+    # print('\nprocess using A(n):')
+    # process(sys.argv[1], sys.argv[2], my_cmpA, wordladder)
+    # f = open(sys.argv[2], 'r')
+    # print("reading output file:")
+    # print(f.read())
+    # end = time.time()
+    # print(end - start)
+
     start = time.time()
-    print('process using G(n):')
-    process(sys.argv[1], sys.argv[2], my_cmpG)
+    print('\nL process using A(n):')
+    process(sys.argv[1], sys.argv[2], Lmy_cmpA, Lwordladder)
     f = open(sys.argv[2], 'r')
     print("reading output file:")
     print(f.read())
     end = time.time()
     print(end - start)
-    '''
-    '''
-    start = time.time()
-    print('\nprocess using H(n):')
-    process(sys.argv[1], sys.argv[2], my_cmpH)
-    f = open(sys.argv[2], 'r')
-    print("reading output file:")
-    print(f.read())
-    end = time.time()
-    print(end - start)
-    '''
-    '''
-    start = time.time()
-    print('\nprocess using A(n):')
-    process(sys.argv[1], sys.argv[2], my_cmpA)
-    f = open(sys.argv[2], 'r')
-    print("reading output file:")
-    print(f.read())
-    end = time.time()
-    print(end - start)
-    '''
-    longest(my_cmpA)
+
+
+    # processLong(4)
+
 main()

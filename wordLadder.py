@@ -241,10 +241,37 @@ def process(infile, outfile, func):
     wordsin.close()
     wordsout.close()
 
+def longest(func):
+    dict = getDict(4)
+    long = []
+    for word in dict:
+        for other in dict:
+            if greed(word,other) == 4:
+                source = Word(word, other, 0, [word])
+                target = Word(other, other)
+                frontier = Pqueue(func)
+                explored = {}
+                frontier.push(source)
+                top = frontier.pop()
+                while top != None:
+                    print(top.list)
+                    if frontier.length == 2:
+                        return top.list
+                    neighbors = dict[top.value]
+                    for neighbor in neighbors:
+                        if not(neighbor in explored):
+                            nextUninformed = top.uninformed + 1
+                            nextList = top.list[:]
+                            nextList.append(neighbor)
+                            next = Word(neighbor, other, nextUninformed, nextList)
+                            frontier.push(next)
+                    explored[top.value] = top
+                    top = frontier.pop()
+    return long
 
 def main():
     # neighbor(sys.argv[1], sys.argv[2])
-
+    '''
     start = time.time()
     print('process using G(n):')
     process(sys.argv[1], sys.argv[2], my_cmpG)
@@ -253,8 +280,8 @@ def main():
     print(f.read())
     end = time.time()
     print(end - start)
-    
-'''
+    '''
+    '''
     start = time.time()
     print('\nprocess using H(n):')
     process(sys.argv[1], sys.argv[2], my_cmpH)
@@ -263,7 +290,8 @@ def main():
     print(f.read())
     end = time.time()
     print(end - start)
-    
+    '''
+    '''
     start = time.time()
     print('\nprocess using A(n):')
     process(sys.argv[1], sys.argv[2], my_cmpA)
@@ -272,6 +300,6 @@ def main():
     print(f.read())
     end = time.time()
     print(end - start)
-'''
+    '''
+    longest(my_cmpA)
 main()
-

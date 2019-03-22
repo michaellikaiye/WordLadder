@@ -5,12 +5,6 @@ import time
 target = ''
 dict = {}
 
-class Word:
-    def __init__(self, v, g=-1, l=[]):
-        self.value = v
-        self.uninformed = g
-        self.list = l
-
 def greed(a):
     # assumes same size as target
     g = 0

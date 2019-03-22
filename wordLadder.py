@@ -39,10 +39,30 @@ def Lmy_cmpA(a,b):
         return 0
     return 1
 
-def uninformedL(a,b):
+def antiLmy_cmpA(a,b):
+    aGreedy = greed(a[1])
+    bGreedy = greed(b[1])
+    aT = aGreedy + a[0]
+    bT = bGreedy + b[0]
+    if aT > bT:
+        return -1
+    if aT == bT:
+        return 0
+    return 1
+
+def Luninformed(a,b):
     aT = a[0]
     bT = b[0]
     if aT < bT:
+        return -1
+    if aT == bT:
+        return 0
+    return 1
+
+def antiLuninformed(a,b):
+    aT = a[0]
+    bT = b[0]
+    if aT > bT:
         return -1
     if aT == bT:
         return 0
@@ -184,6 +204,19 @@ def getDict(length):
         dict[word].remove(word)
     dictall.close()
 
+def wordy(length, specific):
+    dictall = open('dictall.txt', 'r')
+    # creating dict
+    wordys = []
+    lets = list(specific)
+    #
+    for line in dictall:
+        word = line.strip()
+        if len(word) == length and word[0] in lets:
+            wordys.append(word)
+    dictall.close()
+    return wordys
+
 
 def neighbors(infile, outfile):
     # setup
@@ -257,8 +290,6 @@ def Lwordladder(inWord, outWord, func):
         top = frontier.pop()
     return inWord + ',' + outWord
 
-
-
 def process(infile, outfile, func, ladder):
     # setup
     wordsin = open(infile, 'r')
@@ -299,21 +330,24 @@ def longest(word):
         top = frontier.pop()
     return long
 
-def processLong(length):
+def processLong(length, specific):
     getDict(length)
     longestAns = [0]
     i = 0
-    for word in dict.keys():
+    wod = wordy(length, specific)
+    for word in wod:
         ans = longest(word)
         if ans[0] >= longestAns[0]:
             longestAns = ans[:]
         # print(ans[0], ans[2:])
         i += 1
-        if i%10 == 1:
+        if i%20 == 1:
             print(longestAns[0], longestAns[2:])
-            print(ans[0], ans[2:])
+            print(ans[0], ans[2:],'\n')
+    print(longestAns[0], longestAns[2:])
 
 def main():
+    # longest function returns size - 1 (to get true length, add one)
     # neighbor(sys.argv[1], sys.argv[2])
 
     # start = time.time()
@@ -330,11 +364,37 @@ def main():
     process(sys.argv[1], sys.argv[2], Lmy_cmpA, Lwordladder)
     f = open(sys.argv[2], 'r')
     print("reading output file:")
-    print(f.read())
+    out = f.read()
+    print(out)
+    print(len(out.split(',')))
     end = time.time()
     print(end - start)
 
+    # start = time.time()
+    # print('\nanti L process using A(n):')
+    # process(sys.argv[1], sys.argv[2], antiLmy_cmpA, Lwordladder)
+    # f = open(sys.argv[2], 'r')
+    # print("reading output file:")
+    # out = f.read()
+    # print(len(out.split(',')))
+    # end = time.time()
+    # print(end - start)
 
-    # processLong(4)
+    # processLong(6, '')
+
+    # ['16','inch','itch','etch','each','mach','macs','mans','sans','suns','sues','suet','suit','quit','quid','quad','quay']
+    # ['27','aloud','cloud','clout','flout','float','bloat','bleat','blest','blast','beast','beaut','beaus','beats','bests','basts','bases','bates','baths','laths','lathe','lithe','litre','mitre','metre','metro','retro','retry']
+    # ['44','cloudy','clouds','clouts','flouts','flours','floors','floods','bloods','blonds','blinds','blinks','blanks','clanks','cranks','cranes','craned','crated','coated','boated','bolted','belted','belied','belies','bevies','levies','levees','levels','revels','ravels','ravens','mavens','mavins','matins','mating','rating','raping','rapine','repine','reline','relive','revive','revise','devise','device']
+    # head to tail: 1878
+
+    # # test uniqueness
+    # t = open('headtaillong.txt', 'r')
+    # listy = t.read().split(',')
+    # seen = set()
+    # for string in listy:
+    #     if string in seen:
+    #         print(True)
+    #     seen.add(string)
+    # print(False)
 
 main()

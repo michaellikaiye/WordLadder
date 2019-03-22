@@ -1,6 +1,1 @@
-axle,able,ably,ally,alls,ales,apes,aped,sped,spud,spur,slur,slue,clue,club
-head,held,hell,tell,tall,tail
-hate,have,lave,love
-read,head
-hazy,haze,hate,bate,bats,baas,bras,brag,brig,frig,frog
-head,ache
+tail,hail,hair,heir,hear,head

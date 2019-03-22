@@ -19,15 +19,6 @@ def greed(a):
             g += 1
     return g
 
-def my_cmpA(a,b):
-    aT = greed(a.value) + a.uninformed
-    bT = greed(b.value) + b.uninformed
-    if aT < bT:
-        return -1
-    if aT == bT:
-        return 0
-    return 1
-
 def Lmy_cmpA(a,b):
     aGreedy = greed(a[1])
     bGreedy = greed(b[1])
@@ -181,9 +172,6 @@ class Pqueue:
         return q
 
 
-
-
-
 def getDict(length):
     dictall = open('dictall.txt', 'r')
     # creating dict
@@ -217,7 +205,6 @@ def wordy(length, specific):
     dictall.close()
     return wordys
 
-
 def neighbors(infile, outfile):
     # setup
     wordsin = open(infile, 'r')
@@ -236,32 +223,6 @@ def neighbors(infile, outfile):
     wordsin.close()
     wordsout.close()
     return dict
-
-
-def wordladder(inWord, outWord, func):
-    if not(inWord in dict) or not(outWord in dict):
-        return inWord + ',' + outWord
-    source = Word(inWord, 0, [inWord])
-    global target
-    target = outWord
-    frontier = Pqueue(func)
-    explored = {}
-    frontier.push(source)
-    top = frontier.pop()
-    while top != None:
-        if top.value == target:
-            return ','.join(top.list)
-        neighbors = dict[top.value]
-        for neighbor in neighbors:
-            if not(neighbor in explored):
-                nextUninformed = top.uninformed + 1
-                nextList = top.list[:]
-                nextList.append(neighbor)
-                next = Word(neighbor, nextUninformed, nextList)
-                frontier.push(next)
-        explored[top.value] = top
-        top = frontier.pop()
-    return inWord + ',' + outWord
 
 def Lwordladder(inWord, outWord, func):
     if not(inWord in dict) or not(outWord in dict):
@@ -348,16 +309,8 @@ def processLong(length, specific):
 
 def main():
     # longest function returns size - 1 (to get true length, add one)
-    # neighbor(sys.argv[1], sys.argv[2])
 
-    # start = time.time()
-    # print('\nprocess using A(n):')
-    # process(sys.argv[1], sys.argv[2], my_cmpA, wordladder)
-    # f = open(sys.argv[2], 'r')
-    # print("reading output file:")
-    # print(f.read())
-    # end = time.time()
-    # print(end - start)
+    # neighbors(sys.argv[1], sys.argv[2])
 
     start = time.time()
     print('\nL process using A(n):')
@@ -366,7 +319,6 @@ def main():
     print("reading output file:")
     out = f.read()
     print(out)
-    print(len(out.split(',')))
     end = time.time()
     print(end - start)
 
